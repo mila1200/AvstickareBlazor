@@ -1,9 +1,15 @@
-﻿<MudNavMenu>
-    <MudNavLink Href="/" Match="NavLinkMatch.All">Dashboard</MudNavLink>
-    <MudNavLink Href="/servers" Match="NavLinkMatch.Prefix">Servers</MudNavLink>
-    <MudNavGroup Title="Settings" Expanded="true">
-        <MudNavLink Href="/users"  Match="NavLinkMatch.Prefix">Users</MudNavLink>
-        <MudNavLink Href="/security"  Match="NavLinkMatch.Prefix">Security</MudNavLink>
-    </MudNavGroup>
-    <MudNavLink Href="/about"  Match="NavLinkMatch.Prefix">About</MudNavLink>
+﻿
+<MudPaper Width="250px" Elevation="0" Class="py-3" Style="background-color: #F8F9FA; color: #000000;">
+<MudNavMenu  Color="Color.Primary">
+    <MudNavLink Href="/" Icon="@Icons.Material.Filled.House" IconColor="Color.Default" Match="NavLinkMatch.All" Class="py-1">Start</MudNavLink>
+    <MudNavLink Href="/karta" Icon="@Icons.Material.Filled.Map" Match="NavLinkMatch.Prefix" Class="py-1">Karta</MudNavLink>
+    <MudNavLink Href="/mina-stopp" Icon="@Icons.Material.Filled.ViewList"  Match="NavLinkMatch.Prefix" Class="py-1">Mina stopp</MudNavLink>
+    <MudNavLink Href="/mina-favoritplatser" Icon="@Icons.Material.Filled.Star"  Match="NavLinkMatch.Prefix" Class="py-1">Mina favoritplatser</MudNavLink>
+    <MudNavLink Href="/mina-resor" Icon="@Icons.Material.Filled.Signpost"  Match="NavLinkMatch.Prefix" Class="py-1">Mina resor</MudNavLink>
+    <MudDivider Class="my-2" />
+    <MudNavLink Href="/om-avstickare" Icon="@Icons.Material.Filled.Info"  Match="NavLinkMatch.Prefix" Class="py-1">Om applikationen</MudNavLink>
+    <MudDivider Class="mt-20" />
+    <MudNavLink Href="/logga-in" Icon="@Icons.Material.Filled.Login"  Match="NavLinkMatch.Prefix" Class="py-1">Logga in</MudNavLink>
+    <MudNavLink Href="/registrera" Icon="@Icons.Material.Filled.Logout"  Match="NavLinkMatch.Prefix" Class="py-1">Logga ut</MudNavLink>
 </MudNavMenu>
+</MudPaper>

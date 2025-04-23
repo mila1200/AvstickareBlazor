@@ -1,24 +1,41 @@
 ﻿@inherits LayoutComponentBase
+@using MudBlazor
 
-<MudThemeProvider Theme="AvstickareCustomTheme"/>
-<MudPopoverProvider />
+<MudThemeProvider Theme="AvstickareCustomTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
+<MudPopoverProvider />
 
 <MudLayout>
-    <MudAppBar>
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        My Application
+    <MudAppBar Elevation="0" Style="background-color: #009688; color: #000000;" >
+
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="@DrawerToggle" Edge="Edge.Start"
+            Color="Color.Inherit" />
+
+        <!-- Mitten: logotyp -->
+        <MudSpacer />
+        <MudText Class="d-flex justify-center align-center">
+            <img src="images/Avstickare_white.svg" alt="Logotyp" height="35px;" />
+        </MudText>
+        <MudSpacer />
+
+        <!-- höger: användarikon -->
+        <MudStack>
+            <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Size="Size.Large" /> 
+        </MudStack>
+
     </MudAppBar>
-    <MudDrawer @bind-Open="@_drawerOpen">
-        <NavMenu/>
+    <MudDrawer @bind-Open="_drawerOpen" Style="background-color: #F8F9FA; color: #000000;">
+        <NavMenu />
     </MudDrawer>
     <MudMainContent>
-    <MudContainer MaxWidth="MaxWidth.Medium">
-        @Body
-    </MudContainer>
-</MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Medium">
+            @Body
+        </MudContainer>
+    </MudMainContent>
 </MudLayout>
+
+
 @code {
     bool _drawerOpen = true;
 
@@ -27,14 +44,20 @@
         _drawerOpen = !_drawerOpen;
     }
 
-@*Tema för att ändra inställnignar*@
     MudTheme AvstickareCustomTheme = new MudTheme()
     {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#009688",
+            Secondary = "#223843",
+            Tertiary = "#FFD54F",
+            Background = "#F8F9FA",
+        },
         Typography = new Typography()
         {
             Default = new DefaultTypography()
             {
-                FontFamily = new[] { "Nunito", "sans-serif" }
+                FontFamily = new[] { "Nunito", "Helvetica", "Arial", "sans-serif" }
             }
         }
     };
