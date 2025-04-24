@@ -1,0 +1,33 @@
+<MudAppBar Elevation="0" Style="background-color: #009688; color: #000000;">
+
+    <MudTooltip Text="Meny">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="@DrawerToggle" Edge="Edge.Start"
+            Color="Color.Inherit" />
+    </MudTooltip>
+
+    <!-- mitten: logotyp -->
+    <MudSpacer />
+    <MudText Class="d-flex justify-center align-center">
+            <img src="images/Avstickare_white.svg" alt="Logotyp" height="35px;" />
+    </MudText>
+    <MudSpacer />
+
+    <!-- höger: användarikon -->
+    <MudTooltip Text="Profil">
+        <MudStack>
+            <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Size="Size.Large" />
+        </MudStack>
+    </MudTooltip>
+
+</MudAppBar>
+
+@code {
+    <!--tar emot ett eventcallback från MainLayout för att meny ska fungera-->
+    [Parameter]
+    public EventCallback OnDrawerToggle { get; set; }
+
+    private async Task DrawerToggle(MouseEventArgs e)
+    {
+        await OnDrawerToggle.InvokeAsync(e);
+    }
+}

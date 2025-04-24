@@ -7,24 +7,8 @@
 <MudPopoverProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="0" Style="background-color: #009688; color: #000000;" >
-
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="@DrawerToggle" Edge="Edge.Start"
-            Color="Color.Inherit" />
-
-        <!-- Mitten: logotyp -->
-        <MudSpacer />
-        <MudText Class="d-flex justify-center align-center">
-            <img src="images/Avstickare_white.svg" alt="Logotyp" height="35px;" />
-        </MudText>
-        <MudSpacer />
-
-        <!-- höger: användarikon -->
-        <MudStack>
-            <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Size="Size.Large" /> 
-        </MudStack>
-
-    </MudAppBar>
+    <!--matar in drawertoggle till header-komponenten-->
+    <Header OnDrawerToggle="DrawerToggle" />
     <MudDrawer @bind-Open="_drawerOpen" Style="background-color: #F8F9FA; color: #000000;">
         <NavMenu />
     </MudDrawer>
@@ -33,6 +17,10 @@
             @Body
         </MudContainer>
     </MudMainContent>
+    <!--Göms vid större skärmar Breakpoint 960px-->
+    <MudHidden Breakpoint="Breakpoint.SmAndUp">
+        <Footer />
+    </MudHidden>
 </MudLayout>
 
 
