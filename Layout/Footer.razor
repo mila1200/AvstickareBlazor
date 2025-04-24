@@ -1,16 +1,62 @@
+@inject NavigationManager NavigationManager
+@implements IDisposable
+
 <MudAppBar Bottom="true" Style="background-color: rgba(248, 249, 250, 0.5); backdrop-filter: blur(6px);">
-    <MudContainer Class="d-flex justify-space-between align-center">
-        <MudStack>
-            <MudIconButton Icon="@Icons.Material.Filled.House" Size="Size.Large" IconColor="Color.Default">
-            </MudIconButton>
-        </MudStack>
-        <MudStack >
-            <MudIconButton Icon="@Icons.Material.Filled.Map" Size="Size.Large" Match="NavLinkMatch.Prefix">
-            </MudIconButton>
-        </MudStack>
-        <MudStack  >
-            <MudIconButton Icon="@Icons.Material.Filled.ViewList" Size="Size.Large" Match="NavLinkMatch.Prefix">
-            </MudIconButton>
-        </MudStack>
+    <MudContainer Class="d-flex justify-space-between align-center h-100">
+
+        <MudTooltip Text="Hem">
+            <MudIconButton Icon="@Icons.Material.Rounded.House" Href="/" Color="@GetColor("/")" Size="Size.Large" />
+        </MudTooltip>
+
+        <MudTooltip Text="Karta">
+            <MudIconButton Icon="@Icons.Material.Rounded.Map" Href="/karta" Color="@GetColor("/karta")"
+                Size="Size.Large" />
+        </MudTooltip>
+
+        <MudTooltip Text="Mina stopp">
+            <MudIconButton Icon="@Icons.Material.Rounded.ViewList" Href="/mina-stopp" Color="@GetColor("/mina-stopp")"
+                Size="Size.Large" />
+        </MudTooltip>
+
     </MudContainer>
 </MudAppBar>
+
+@code {
+    //för att hanter active i footern
+    //håller koll på URL
+    private string? currentPath;
+
+    //körs en gång när komponenten laddas, tar hjälp av OnLocationChanged för att veta när sidan byts
+    protected override void OnInitialized()
+    {
+        currentPath = GetRelativePath();
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    //körs när URL ändras, uppdaterar URL, renderar om komponent
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentPath = GetRelativePath();
+        InvokeAsync(StateHasChanged);
+    }
+
+    //returnerar URL
+    private string GetRelativePath()
+    {
+        var currentUri = NavigationManager.Uri.ToLower();
+        var baseUri = NavigationManager.BaseUri.ToLower();
+        return currentUri.Replace(baseUri, "/");
+    }
+
+    //returnerar olika färger baserat på om URL matchar
+    private Color GetColor(string path)
+    {
+        return currentPath == path.ToLower() ? Color.Primary : Color.Default;
+    }
+
+    //avbryter när användaren navigerar bort
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}
