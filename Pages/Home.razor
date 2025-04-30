@@ -1,7 +1,86 @@
 ﻿@page "/"
+@using static MudBlazor.CategoryTypes
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+@using AvstickareBlazor.Models
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject TripService TripService
 
 <PageTitle>Start</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Gör din resa till ett äventyr!</h1>
 
-Welcome to your new app.
+<MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+    <h2>Vart vill du resa?</h2>
+    <MudTextField T="string" Required="true" RequiredError="Du måste ange en startpunkt" @bind-Value="FromValue"
+        Label="Från" Variant="Variant.Outlined" />
+
+    <MudTextField T="string" Required="true" RequiredError="Du måste ange en slutdestinaton" @bind-Value="ToValue"
+        Label="Till" Variant="Variant.Outlined" />
+    <MudButton OnClick="SendTripRequest" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowForward"
+        Style="color: black;" Color="Color.Primary">Skapa rutt</MudButton>
+</MudForm>
+
+@code
+{
+    private bool success;
+    private string[] errors = { };
+    private MudForm? form;
+    public string? ErrorMessage { get; set; }
+
+    public string? FromValue { get; set; }
+    public string? ToValue { get; set; }
+
+    //klass som lagrar värden som ska skickas till backend
+
+    private async Task SendTripRequest()
+    {
+        if (form is not null)
+        {
+            await form.Validate();
+        }
+
+        if (!success)
+        {
+            ErrorMessage = "Ruttplaneraren är inte korrekt ifylld.";
+            return;
+        }
+
+        TripService.Input = new()
+        {
+            FromLocation = FromValue,
+            ToLocation = ToValue
+        };
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("http://localhost:5013/api/Trip/plan", TripService.Input);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<TripPlanResult>();
+
+                if (result is not null)
+                {
+                    TripService.LatestTrip = result;
+                    Navigation.NavigateTo("/karta");
+                }
+                else
+                {
+                    ErrorMessage = "Ett fel inträffade.";
+                }
+                
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                ErrorMessage = $"Ett fel inträffade: {error}";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Fel vid anrop: {ex.Message}";
+        }
+    }
+}

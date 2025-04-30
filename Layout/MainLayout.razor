@@ -9,14 +9,21 @@
 <MudLayout>
     <!--matar in drawertoggle till header-komponenten-->
     <Header OnDrawerToggle="DrawerToggle" />
-    <MudDrawer @bind-Open="_drawerOpen" Style="background-color: #F8F9FA; color: #000000;">
-        <NavMenu />
-    </MudDrawer>
-    <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Medium">
-            @Body
-        </MudContainer>
-    </MudMainContent>
+
+    <aside>
+        <MudDrawer @bind-Open="_drawerOpen" Style="background-color: #F8F9FA; color: #000000;">
+            <NavMenu />
+        </MudDrawer>
+    </aside>
+
+    <main>
+        <MudMainContent>
+            <MudContainer MaxWidth="MaxWidth.Medium">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </main>
+    
     <!--Göms vid större skärmar Breakpoint 960px-->
     <MudHidden Breakpoint="Breakpoint.SmAndUp">
         <Footer />

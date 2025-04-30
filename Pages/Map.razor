@@ -1,3 +1,20 @@
 @page "/karta"
+@inject IJSRuntime JS
+@inject TripService TripService
 
 <PageTitle>Karta</PageTitle>
+
+<div id="map" style="height:100vh; width:100vw;" />
+
+@code
+{
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && TripService.LatestTrip is not null)
+        {
+            //läs in karta med Javascript
+            await JS.InvokeVoidAsync("initMap");
+            await JS.InvokeVoidAsync("drawTrip", TripService.LatestTrip?.Polyline, TripService.LatestTrip?.SuggestedPlaces);
+        }
+    }
+}
