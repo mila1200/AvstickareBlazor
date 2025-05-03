@@ -1,34 +1,72 @@
-<MudAppBar Elevation="0" Style="background-color: #009688; color: #000000;">
+@inject NavigationManager NavigationManager
+@implements IDisposable
+
+<MudAppBar Fixed="true" Elevation="0" Style="@GetAppBarStyle()">
 
     <MudTooltip Text="Meny">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="@DrawerToggle" Edge="Edge.Start"
-            Color="Color.Inherit" />
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="@DrawerToggle" Edge="Edge.Start" Color="@GetIconColor()" Size="Size.Large" />
     </MudTooltip>
 
-    <!-- mitten: logotyp -->
     <MudSpacer />
+
     <MudText Class="d-flex justify-center align-center">
         <img src="images/Avstickare_white.svg" alt="Logotyp" height="35px;" />
     </MudText>
+
     <MudSpacer />
 
-    <!-- höger: användarikon -->
     <MudTooltip Text="Profil">
         <MudStack>
-            <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Inherit" Size="Size.Large" />
+            <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="@GetIconColor()" Size="Size.Large" />
         </MudStack>
     </MudTooltip>
 
 </MudAppBar>
 
-
 @code {
-    <!--tar emot ett eventcallback från MainLayout för att meny ska fungera-->
     [Parameter]
     public EventCallback OnDrawerToggle { get; set; }
 
     private async Task DrawerToggle(MouseEventArgs e)
     {
         await OnDrawerToggle.InvokeAsync(e);
+    }
+
+    private string? currentPath;
+
+    protected override void OnInitialized()
+    {
+        currentPath = GetRelativePath();
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentPath = GetRelativePath();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private string GetRelativePath()
+    {
+        var currentUri = NavigationManager.Uri.ToLower();
+        var baseUri = NavigationManager.BaseUri.ToLower();
+        return currentUri.Replace(baseUri, "/");
+    }
+
+    private string GetAppBarStyle()
+    {
+        return currentPath == "/karta"
+            ? "background-color: rgba(248, 249, 250, 0.5); backdrop-filter: blur(6px); color: #000;"
+            : "background-color: #009688; color: #000;";
+    }
+
+    private Color GetIconColor()
+    {
+        return Color.Default;
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }

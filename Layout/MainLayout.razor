@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @using MudBlazor
+@inject NavigationManager NavManager
+@implements IDisposable
 
 <MudThemeProvider Theme="AvstickareCustomTheme" />
 <MudDialogProvider />
@@ -10,20 +12,24 @@
     <!--matar in drawertoggle till header-komponenten-->
     <Header OnDrawerToggle="DrawerToggle" />
 
-    <aside>
-        <MudDrawer @bind-Open="_drawerOpen" Style="background-color: #F8F9FA; color: #000000;">
-            <NavMenu />
-        </MudDrawer>
-    </aside>
+    <MudDrawer @bind-Open="_drawerOpen" Style="background-color: #F8F9FA; color: #000000;">
+        <NavMenu />
+    </MudDrawer>
 
-    <main>
-        <MudMainContent>
-            <MudContainer MaxWidth="MaxWidth.Medium">
-                @Body
-            </MudContainer>
+    <!--Bort med mudcontiner för att få bort padding vid kartläge-->
+    @if (CurrentPath == "karta")
+    {
+        <MudMainContent Class="p-0">
+            @Body
         </MudMainContent>
-    </main>
-    
+    }
+    else
+    {
+        <MudMainContent>
+            @Body
+        </MudMainContent>
+    }
+
     <!--Göms vid större skärmar Breakpoint 960px-->
     <MudHidden Breakpoint="Breakpoint.SmAndUp">
         <Footer />
@@ -32,7 +38,33 @@
 
 
 @code {
+
     bool _drawerOpen = true;
+
+    private string? CurrentPath;
+
+    protected override void OnInitialized()
+    {
+        NavManager.LocationChanged += OnLocationChanged;
+        UpdateUrl();
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        UpdateUrl();
+        StateHasChanged();
+    }
+
+    private void UpdateUrl()
+    {
+        //tar bara ut sökvägen, t.ex. "karta" från hela URL:en
+        CurrentPath = NavManager.ToBaseRelativePath(NavManager.Uri).Split('?')[0];
+    }
+
+    public void Dispose()
+    {
+        NavManager.LocationChanged -= OnLocationChanged;
+    }
 
     void DrawerToggle()
     {

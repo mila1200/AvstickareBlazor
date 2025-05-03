@@ -31,9 +31,10 @@
         <a href="." class="reload">Reload</a>
         <span class="dismiss">🗙</span>
     </div>
+    <!--anropar google och initmap när kartan r laddad. Finns nyare variant dr man läser in { Map } utan callback men det fugnerar ej.-->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBC2KUDfp47_KsGO3C_JmjcblLR3fDT42k&v=weekly&libraries=geometry,marker" async defer></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="_framework/blazor.webassembly.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBC2KUDfp47_KsGO3C_JmjcblLR3fDT42k" async defer></script>
     <script src="js/site.js"></script>
     <script>navigator.serviceWorker.register('service-worker.js');</script>
 </body>

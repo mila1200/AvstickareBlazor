@@ -6,21 +6,31 @@
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject TripService TripService
+@inject IJSRuntime JS
 
 <PageTitle>Start</PageTitle>
 
-<h1>Gör din resa till ett äventyr!</h1>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
+    <h1>Gör din resa till ett äventyr!</h1>
 
-<MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
-    <h2>Vart vill du resa?</h2>
-    <MudTextField T="string" Required="true" RequiredError="Du måste ange en startpunkt" @bind-Value="FromValue"
-        Label="Från" Variant="Variant.Outlined" />
+    @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+    {
+        <MudAlert Severity="Severity.Error" Elevation="0" Dense="true" Class="mb-4">
+            @ErrorMessage
+        </MudAlert>
+    }
 
-    <MudTextField T="string" Required="true" RequiredError="Du måste ange en slutdestinaton" @bind-Value="ToValue"
-        Label="Till" Variant="Variant.Outlined" />
-    <MudButton OnClick="SendTripRequest" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowForward"
-        Style="color: black;" Color="Color.Primary">Skapa rutt</MudButton>
-</MudForm>
+    <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+        <h2>Vart vill du resa?</h2>
+        <MudTextField InputId="fromInput" T="string" Required="true" RequiredError="Du måste ange en startpunkt"
+            @bind-Value="FromValue" Label="Från" Variant="Variant.Outlined" />
+
+        <MudTextField InputId="ToInput" T="string" Required="true" RequiredError="Du måste ange en slutdestinaton"
+            @bind-Value="ToValue" Label="Till" Variant="Variant.Outlined" />
+        <MudButton OnClick="SendTripRequest" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowForward"
+            Style="color: black;" Color="Color.Primary" Class="mt-6">Skapa rutt</MudButton>
+    </MudForm>
+</MudContainer>
 
 @code
 {
@@ -33,7 +43,6 @@
     public string? ToValue { get; set; }
 
     //klass som lagrar värden som ska skickas till backend
-
     private async Task SendTripRequest()
     {
         if (form is not null)
@@ -70,12 +79,12 @@
                 {
                     ErrorMessage = "Ett fel inträffade.";
                 }
-                
+
             }
             else
             {
                 var error = await response.Content.ReadAsStringAsync();
-                ErrorMessage = $"Ett fel inträffade: {error}";
+                ErrorMessage = error;
             }
         }
         catch (Exception ex)
