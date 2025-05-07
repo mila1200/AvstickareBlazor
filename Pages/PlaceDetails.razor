@@ -3,7 +3,7 @@
 @using AvstickareBlazor.Models
 @inject HttpClient Http
 
-<MudContainer Class="p-4">
+<MudContainer Class="p-4 mb-20">
     @if (isLoading)
     {
         <MudProgressCircular Indeterminate="true" />
@@ -16,38 +16,87 @@
     {
         @if (!string.IsNullOrEmpty(place.Photo))
         {
-            <img src="@place.Photo" alt="Platsbild" style="max-width:100%; border-radius:8px; margin-bottom:20px;" />
+            <img src="@place.Photo" alt="Platsbild"
+                style="max-width:100%; height:auto; border-radius:8px; margin-bottom:20px; margin-top: 20px; display: block;" />
         }
 
-        <MudText Typo="Typo.h4">@place.Name</MudText>
+        <h1>@place.Name</h1>
         <MudText Typo="Typo.subtitle1">@place.Address</MudText>
 
-        @if (!string.IsNullOrEmpty(place.Phone))
-        {
-            <MudText>@place.Phone</MudText>
-        }
+        <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Style="color: black;" Size="Size.Large"
+            Color="Color.Primary" Class="mt-6">Lägg till
+        </MudButton>
 
-        @if (!string.IsNullOrEmpty(place.Website))
-        {
-            <MudText><a href="@place.Website" target="_blank">@place.Website</a></MudText>
-        }
+        <MudDivider Class="mt-5" />
 
-        @if (place.Rating.HasValue)
-        {
-            <MudText>Betyg: @place.Rating</MudText>
-        }
+        <MudContainer MaxWidth="MaxWidth.Medium" Style="margin: 0">
+            <h2>Information</h2>
 
-        @if (place.OpeningHours != null)
-        {
-            <MudList T="string">
-                @foreach (var day in place.OpeningHours)
+            <MudGrid>
+                @if (place.OpeningHours != null)
                 {
-                    <MudListItem>@day</MudListItem>
+                    <MudItem xs="12" sm="6" Class="d-flex flex-column">
+                        <MudPaper Class="pa-4 rounded" Style="background-color: #FFDF7880; flex: 1;" Elevation="4">
+                            <h3>Öppettider</h3>
+                            @foreach (var day in place.OpeningHours)
+                            {
+                                <MudText Typo="Typo.body1">@day</MudText>
+                            }
+                        </MudPaper>
+                    </MudItem>
                 }
-            </MudList>
-        }
+
+                @if (!string.IsNullOrEmpty(place.Phone))
+                {
+                    <MudItem xs="12" sm="6" Class="d-flex flex-column">
+                        <MudPaper Class="pa-4 rounded" Style="background-color: #FFDF7880; flex: 1;" Elevation="4">
+                            <h3>Telefon</h3>
+                            <MudText>@place.Phone</MudText>
+                        </MudPaper>
+                    </MudItem>
+                }
+
+                @if (!string.IsNullOrEmpty(place.Website))
+                {
+                    <MudItem xs="12" sm="6" Class="d-flex flex-column">
+                        <MudPaper Class="pa-4 rounded" Style="background-color: #FFDF7880; flex: 1;" Elevation="4">
+                            <h3>Webbplats</h3>
+                            <MudTooltip Text="Öppnas i separat fönster" Arrow="true" Placement="Placement.Bottom">
+                                <MudLink Href="@place.Website" target="_blank" Underline="Underline.Always"
+                                    Class="d-flex align-center"
+                                    Style="color: black; text-decoration-color: black; margin-top: 10px;"
+                                     aria-label="@($"{place.Name}, öppnas i separat fönster")">
+                                    <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Class="me-1" Style="color: black;" />
+                                    <span style="color: black;">@place.Name</span>
+                                </MudLink>
+                            </MudTooltip>
+                        </MudPaper>
+                    </MudItem>
+                }
+
+                @if (place.Rating.HasValue)
+                {
+                    <MudItem xs="12" sm="6" Class="d-flex flex-column">
+                        <MudPaper Class="pa-4 rounded" Style="background-color: #FFDF7880; flex: 1;" Elevation="4">
+                            <h3>Betyg</h3>
+                            <MudText>@place.Rating</MudText>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.PinDrop" Style="color: black;"
+                Color="Color.Primary" FullWidth="true" Size="Size.Large" Class="mt-6">Visa på kartan
+            </MudButton>
+
+            <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.StarPurple500"
+                Style="color: black; background-color: #FFD54F;" FullWidth="true" Size="Size.Large" Class="mt-6">Spara som
+                favorit
+            </MudButton>
+        </MudContainer>
     }
 </MudContainer>
+
 
 @code {
     [Parameter]
@@ -73,7 +122,7 @@
 
         //anropet och felhantering
         try
-        {//lägga anrop i services?
+        {
             place = await Http.GetFromJsonAsync<PlaceDetailsFront>($"/api/Place/{mapServicePlaceId}");
             if (place == null)
             {
