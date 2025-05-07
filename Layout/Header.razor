@@ -1,7 +1,7 @@
 @inject NavigationManager NavigationManager
 @implements IDisposable
 
-<MudAppBar Fixed="true" Elevation="0" Style="@GetAppBarStyle()">
+<MudAppBar Fixed="true" Elevation="1" Style="@GetAppBarStyle()">
 
     <MudTooltip Text="Meny">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="@DrawerToggle" Edge="Edge.Start" Color="@GetIconColor()" Size="Size.Large" />
@@ -10,7 +10,7 @@
     <MudSpacer />
 
     <MudText Class="d-flex justify-center align-center">
-        <img src="images/Avstickare_white.svg" alt="Logotyp" height="35px;" />
+        <img src="@GetLogoPath()" alt="Logotyp" height="35px;" />
     </MudText>
 
     <MudSpacer />
@@ -58,6 +58,14 @@
         return currentPath == "/karta"
             ? "background-color: rgba(248, 249, 250, 0.5); backdrop-filter: blur(6px); color: #000;"
             : "background-color: #009688; color: #000;";
+    }
+
+    //väljer logga beroende på bakgrund
+    private string GetLogoPath()
+    {
+        return currentPath == "/karta"
+        ? "images/Avstickare.svg"
+        : "images/Avstickare_white.svg";
     }
 
     private Color GetIconColor()

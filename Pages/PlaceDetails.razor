@@ -1,0 +1,92 @@
+@page "/plats/{mapServicePlaceId}"
+@using System.Net.Http.Json
+@using AvstickareBlazor.Models
+@inject HttpClient Http
+
+<MudContainer Class="p-4">
+    @if (isLoading)
+    {
+        <MudProgressCircular Indeterminate="true" />
+    }
+    else if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
+    }
+    else if (place != null)
+    {
+        @if (!string.IsNullOrEmpty(place.Photo))
+        {
+            <img src="@place.Photo" alt="Platsbild" style="max-width:100%; border-radius:8px; margin-bottom:20px;" />
+        }
+
+        <MudText Typo="Typo.h4">@place.Name</MudText>
+        <MudText Typo="Typo.subtitle1">@place.Address</MudText>
+
+        @if (!string.IsNullOrEmpty(place.Phone))
+        {
+            <MudText>@place.Phone</MudText>
+        }
+
+        @if (!string.IsNullOrEmpty(place.Website))
+        {
+            <MudText><a href="@place.Website" target="_blank">@place.Website</a></MudText>
+        }
+
+        @if (place.Rating.HasValue)
+        {
+            <MudText>Betyg: @place.Rating</MudText>
+        }
+
+        @if (place.OpeningHours != null)
+        {
+            <MudList T="string">
+                @foreach (var day in place.OpeningHours)
+                {
+                    <MudListItem>@day</MudListItem>
+                }
+            </MudList>
+        }
+    }
+</MudContainer>
+
+@code {
+    [Parameter]
+    public string? mapServicePlaceId { get; set; }
+
+    private PlaceDetailsFront? place;
+
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+        place = null;
+
+        if (string.IsNullOrWhiteSpace(mapServicePlaceId))
+        {
+            errorMessage = "Ingen plats-ID angiven.";
+            isLoading = false;
+            return;
+        }
+
+        //anropet och felhantering
+        try
+        {//lägga anrop i services?
+            place = await Http.GetFromJsonAsync<PlaceDetailsFront>($"/api/Place/{mapServicePlaceId}");
+            if (place == null)
+            {
+                errorMessage = "Platsinformation saknas.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ett oväntat fel uppstod: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

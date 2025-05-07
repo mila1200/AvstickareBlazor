@@ -1,7 +1,5 @@
 ﻿@inherits LayoutComponentBase
 @using MudBlazor
-@inject NavigationManager NavManager
-@implements IDisposable
 
 <MudThemeProvider Theme="AvstickareCustomTheme" />
 <MudDialogProvider />
@@ -16,19 +14,9 @@
         <NavMenu />
     </MudDrawer>
 
-    <!--Bort med mudcontiner för att få bort padding vid kartläge-->
-    @if (CurrentPath == "karta")
-    {
-        <MudMainContent Class="p-0">
-            @Body
-        </MudMainContent>
-    }
-    else
-    {
         <MudMainContent>
             @Body
         </MudMainContent>
-    }
 
     <!--Göms vid större skärmar Breakpoint 960px-->
     <MudHidden Breakpoint="Breakpoint.SmAndUp">
@@ -41,30 +29,9 @@
 
     bool _drawerOpen = true;
 
-    private string? CurrentPath;
+    
 
-    protected override void OnInitialized()
-    {
-        NavManager.LocationChanged += OnLocationChanged;
-        UpdateUrl();
-    }
-
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        UpdateUrl();
-        StateHasChanged();
-    }
-
-    private void UpdateUrl()
-    {
-        //tar bara ut sökvägen, t.ex. "karta" från hela URL:en
-        CurrentPath = NavManager.ToBaseRelativePath(NavManager.Uri).Split('?')[0];
-    }
-
-    public void Dispose()
-    {
-        NavManager.LocationChanged -= OnLocationChanged;
-    }
+    
 
     void DrawerToggle()
     {

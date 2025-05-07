@@ -7,10 +7,10 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5013/") });
 
-//service, singleton för att datan rutten ska vara kvar när användaren går från kartan
-builder.Services.AddSingleton<TripService>();
+//service
+builder.Services.AddScoped<TripService>();
 
 //inkludera mubblazor
 builder.Services.AddMudServices();

@@ -47,11 +47,18 @@ window.drawTrip = async function (polyline, places) {
             glyphColor: "#FFD54F",
         });
 
-        new AdvancedMarkerElement({
+        const marker = new AdvancedMarkerElement({
             map: window.mapInstance,
             position: { lat: place.lat, lng: place.lng },
             content: pin.element,
             title: place.name
         })
+
+        //öppnar upp detaljsidan när användaren klickar på markören
+        if (place.mapServicePlaceId) {
+            marker.addListener("gmp-click", () => {
+                window.location.href = `/plats/${place.mapServicePlaceId}`;
+            });
+        }
     }
 };
