@@ -11,6 +11,8 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://
 
 //service
 builder.Services.AddScoped<TripService>();
+builder.Services.AddScoped<PlaceService>();
+builder.Services.AddScoped<FavoriteService>();
 
 //inkludera mubblazor
 builder.Services.AddMudServices();

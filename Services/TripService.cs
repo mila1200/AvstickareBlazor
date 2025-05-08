@@ -9,7 +9,7 @@ namespace AvstickareBlazor
 
         public TripPlanResult? LatestTrip { get; set; }
 
-        //anropa backend för att 
+        //anropa backend för att ta fram resa från punkt A till punkt B.
         public async Task<TripPlanResult> PlanTripAsync(string? fromLocation, string? toLocation)
         {
             var request = new PlanTripRequest
@@ -22,8 +22,7 @@ namespace AvstickareBlazor
 
             if (!response.IsSuccessStatusCode)
             {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Det uppstod ett fel.");
+                throw new Exception("Det uppstod ett fel.");
             }
 
             var result = await response.Content.ReadFromJsonAsync<TripPlanResult>();
