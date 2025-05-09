@@ -7,6 +7,7 @@
 @inject ISnackbar Snackbar
 @inject FavoriteService FavoriteService
 
+
 <MudContainer Class="p-4 mb-20">
     @if (isLoading)
     {
@@ -92,7 +93,6 @@
             <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.PinDrop" Style="color: black;"
                 Color="Color.Primary" FullWidth="true" Size="Size.Large" Class="mt-6">Visa på kartan
             </MudButton>
-
             <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.StarPurple500"
                 Style="color: black; background-color: #FFD54F;" FullWidth="true" Size="Size.Large" Class="mt-6"
                 OnClick="AddToFavorites">Spara som

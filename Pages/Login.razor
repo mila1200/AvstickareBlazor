@@ -1,3 +1,113 @@
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject CustomAuthStateProvider AuthProvider
+@inject NavigationManager Navigation
+
 @page "/logga-in"
+@using AvstickareBlazor.Models
 
 <PageTitle>Logga in</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
+
+    <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+        <h1>Logga in</h1>
+
+        @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+        {
+            <MudAlert Severity="Severity.Error" Elevation="0" Dense="true" Class="mb-4">
+                @ErrorMessage
+            </MudAlert>
+        }
+
+        <MudTextField InputId="email" T="string" Required="true" RequiredError="Du måste ange en e-postadress"
+            @bind-Value="Email" Label="E-postadress" Variant="Variant.Outlined" />
+
+        <MudTextField InputId="password" Required="true" RequiredError="Du måste ange ett lösenord"
+            @bind-Value="Password" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" AdornmentAriaLabel="Show Password" OnAdornmentClick="ClicktoShow" Label="Lösenord" Variant="Variant.Outlined" />
+
+        <MudButton OnClick="LoginUser" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Login"
+            Style="color: black;" Color="Color.Primary" Class="mt-6">Logga in</MudButton>
+    </MudForm>
+    <div class="d-flex justify-center mt-15">
+    <img src="images/Avstickare.svg" alt="Logotyp" style="height: 50px;" />
+    </div>
+</MudContainer>
+
+@code
+{
+    //lösenord
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+    bool isShow;
+
+//meddela användare
+    private bool success;
+    private string[] errors = { };
+    public string? ErrorMessage { get; set; }
+    //formuläret
+    private MudForm? form;
+    //värde för inloggning
+    public string? Email { get; set; }
+    public string? Password { get; set; }
+
+    void ClicktoShow()
+    {
+        @if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+
+    private async Task LoginUser()
+    {
+        if (form is not null)
+            await form.Validate();
+
+        if (!success)
+        {
+            ErrorMessage = "Fyll i e-post och lösenord.";
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("/api/Auth/logga-in", new
+            {
+                Email,
+                Password
+            });
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                ErrorMessage = "Inloggningen misslyckades. Försök igen";
+                return;
+            }
+
+            var data = await response.Content.ReadFromJsonAsync<LoginResult>();
+
+            if (data is null || string.IsNullOrWhiteSpace(data.Token))
+            {
+                ErrorMessage = "Token saknas i svaret från servern.";
+                return;
+            }
+
+            await LocalStorage.SetItemAsync("authToken", data.Token);
+            AuthProvider.NotifyUserChanged();
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Tekniskt fel: " + ex.Message;
+        }
+    }
+}
