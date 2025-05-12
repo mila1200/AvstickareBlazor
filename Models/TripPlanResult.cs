@@ -1,5 +1,3 @@
-using static AvstickareBlazor.Pages.Map;
-
 namespace AvstickareBlazor.Models
 {
     public class TripPlanResult

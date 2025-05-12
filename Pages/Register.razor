@@ -1,3 +1,122 @@
 @page "/registrera"
+@using AvstickareBlazor.Models
+@inject HttpClient Http
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject CustomAuthStateProvider AuthProvider
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
 <PageTitle>Registrera</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
+    <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+        <h1>Registrera konto</h1>
+
+        @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+        {
+            <MudAlert Severity="Severity.Error" Elevation="0" Dense="true" Class="mb-4">
+                @ErrorMessage
+            </MudAlert>
+        }
+
+        <MudTextField InputId="firstname" T="string" Required="true" RequiredError="Förnamn krävs"
+                      @bind-Value="FirstName" Label="Förnamn" Variant="Variant.Outlined" />
+
+        <MudTextField InputId="lastname" T="string" Required="true" RequiredError="Efternamn krävs"
+                      @bind-Value="LastName" Label="Efternamn" Variant="Variant.Outlined" />
+
+        <MudTextField InputId="username" T="string" Required="true" RequiredError="Användarnamn krävs"
+                      @bind-Value="UserName" Label="Användarnamn" Variant="Variant.Outlined" />
+
+        <MudTextField InputId="email" T="string" Required="true" RequiredError="E-post krävs"
+                      @bind-Value="Email" Label="E-postadress" Variant="Variant.Outlined" />
+
+        <MudTextField InputId="password" Required="true" RequiredError="Lösenord krävs"
+                      @bind-Value="Password" InputType="@PasswordInput" Adornment="Adornment.End"
+                      AdornmentIcon="@PasswordInputIcon" AdornmentAriaLabel="Visa lösenord"
+                      OnAdornmentClick="ClickToShow"
+                      Label="Lösenord" Variant="Variant.Outlined" />
+
+        <MudButton OnClick="RegisterUser" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.PersonAdd"
+                   Style="color: black;" Color="Color.Primary" Class="mt-6">
+            Skapa konto
+        </MudButton>
+    </MudForm>
+</MudContainer>
+
+@code {
+    private MudForm? form;
+    private bool success;
+    private string[] errors = { };
+    public string? ErrorMessage { get; set; }
+
+    private string? FirstName;
+    private string? LastName;
+    private string? UserName;
+    private string? Email;
+    private string? Password;
+
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+    bool isShow;
+
+    void ClickToShow()
+    {
+        isShow = !isShow;
+        PasswordInputIcon = isShow ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
+        PasswordInput = isShow ? InputType.Text : InputType.Password;
+    }
+
+    private async Task RegisterUser()
+    {
+         if (form is not null)
+         {
+            await form.Validate();
+         }
+        
+
+        if (!success)
+        {
+            ErrorMessage = "Fyll i fälten.";
+            return;
+        }
+
+        var newUser = new RegisterRequest
+        {   
+            UserName = UserName,
+            FirstName = FirstName,
+            LastName = LastName,
+            Email = Email,
+            Password = Password
+        };
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("/api/Auth/registrera", newUser);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                ErrorMessage = await response.Content.ReadAsStringAsync();
+                return;
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+
+            if (result != null && result.TryGetValue("token", out var token))
+            {
+                await LocalStorage.SetItemAsync("authToken", token);
+                AuthProvider.NotifyUserChanged();
+                Snackbar.Add("Registrering lyckades!", Severity.Success);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                ErrorMessage = "Registreringen lyckades, men kunde inte logga in automatiskt.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Ett fel uppstod: {ex.Message}";
+        }
+    }
+}

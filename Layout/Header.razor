@@ -1,10 +1,15 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
 @inject NavigationManager NavigationManager
 @implements IDisposable
+@inject AuthenticationStateProvider AuthProvider
+
 
 <MudAppBar Fixed="true" Elevation="1" Style="@GetAppBarStyle()">
 
     <MudTooltip Text="Meny">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="@DrawerToggle" Edge="Edge.Start" Color="@GetIconColor()" Size="Size.Large" />
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" OnClick="@DrawerToggle" Edge="Edge.Start"
+            Color="@GetIconColor()" Size="Size.Large" />
     </MudTooltip>
 
     <MudSpacer />
@@ -14,6 +19,20 @@
     </MudText>
 
     <MudSpacer />
+
+    <AuthorizeView>
+        <Authorized Context="auth">
+            <MudText Typo="Typo.subtitle2" Class="me-4 d-none d-sm-flex">
+                Inloggad som: @auth.User.FindFirst("unique_name")?.Value
+            </MudText>
+        </Authorized>
+        <NotAuthorized>
+            <MudText Typo="Typo.subtitle2" Class="me-4">
+                <MudNavLink Href="/logga-in" Icon="@Icons.Material.Filled.Login" Match="NavLinkMatch.Prefix">Logga
+                    in</MudNavLink>
+            </MudText>
+        </NotAuthorized>
+    </AuthorizeView>
 
     <MudTooltip Text="Profil">
         <MudStack>
@@ -36,8 +55,14 @@
 
     protected override void OnInitialized()
     {
-        currentPath = GetRelativePath();
+        AuthProvider.AuthenticationStateChanged += AuthStateChanged;
         NavigationManager.LocationChanged += OnLocationChanged;
+        currentPath = GetRelativePath();
+    }
+
+    private async void AuthStateChanged(Task<AuthenticationState> task)
+    {
+        await InvokeAsync(StateHasChanged);
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -56,8 +81,8 @@
     private string GetAppBarStyle()
     {
         return currentPath == "/karta"
-            ? "background-color: rgba(248, 249, 250, 0.5); backdrop-filter: blur(6px); color: #000;"
-            : "background-color: #009688; color: #000;";
+        ? "background-color: rgba(248, 249, 250, 0.5); backdrop-filter: blur(6px); color: #000;"
+        : "background-color: #009688; color: #000;";
     }
 
     //väljer logga beroende på bakgrund
@@ -75,6 +100,7 @@
 
     public void Dispose()
     {
+        AuthProvider.AuthenticationStateChanged -= AuthStateChanged;
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
