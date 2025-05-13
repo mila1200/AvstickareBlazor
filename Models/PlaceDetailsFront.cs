@@ -11,5 +11,7 @@ namespace AvstickareBlazor.Models
         public double? Rating { get; set; }
         public List<string>? OpeningHours { get; set; }
         public string? Photo { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
     }
 }

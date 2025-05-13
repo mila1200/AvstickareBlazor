@@ -62,3 +62,35 @@ window.drawTrip = async function (polyline, places) {
         }
     }
 };
+
+window.highlightPlace = async function (lat, lng, name) {
+    if (!window.mapInstance || !lat || !lng) return;
+
+    const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
+
+    const pin = new PinElement({
+        background: "#f44336", // röd för att sticka ut
+        borderColor: "#b71c1c",
+        glyphColor: "#fff"
+    });
+
+    const marker = new AdvancedMarkerElement({
+        map: mapInstance,
+        position: { lat: lat, lng: lng },
+        content: pin.element,
+        title: name
+    });
+
+    const info = new google.maps.InfoWindow({
+        content: `<strong>${name}</strong>`
+    });
+
+    info.open(mapInstance, marker);
+
+    marker.addListener("gmp-click", () => {
+        info.open(mapInstance, marker);
+    });
+
+    mapInstance.setZoom(14);
+    mapInstance.panTo({ lat: lat, lng: lng });
+};

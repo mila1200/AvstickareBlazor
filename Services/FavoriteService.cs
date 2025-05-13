@@ -49,8 +49,10 @@ namespace AvstickareBlazor
             var token = await _localStorage.GetItemAsync<string>("authToken");
 
             if (string.IsNullOrWhiteSpace(token))
+            {
                 throw new UnauthorizedAccessException("Du är inte inloggad.");
-
+            }
+                
             var request = new HttpRequestMessage(HttpMethod.Get, $"/api/FavoritePlace/exists/{mapServicePlaceId}");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 

@@ -11,10 +11,12 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5013/") });
 
+//services
 builder.Services.AddScoped<TripService>();
 builder.Services.AddScoped<PlaceService>();
 builder.Services.AddScoped<FavoriteService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<TripStopService>();
 
 //localstorage
 builder.Services.AddBlazoredLocalStorage();
