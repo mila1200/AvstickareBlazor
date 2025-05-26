@@ -13,6 +13,7 @@ namespace AvstickareBlazor
 
         public async Task<string?> LoginAsync(string email, string password)
         {
+            //skickar e-post och lösenord till backend
             var response = await _http.PostAsJsonAsync("/api/Auth/logga-in", new { Email = email, Password = password });
 
             if (!response.IsSuccessStatusCode)
@@ -27,7 +28,9 @@ namespace AvstickareBlazor
                 return null;
             }
 
+            //lagra i ls
             await _localStorage.SetItemAsync("authToken", result.Token);
+            //uppdatera inloggningstillstånd
             _authProvider.NotifyUserChanged();
             return result.Token;
         }

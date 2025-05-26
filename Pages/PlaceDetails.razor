@@ -15,8 +15,6 @@
 @inject TripService TripService
 @inject TripStopService TripStopService
 
-
-
 <MudContainer Class="p-4 mb-20">
 @if (isLoading)
 {
@@ -35,10 +33,8 @@ else if (place != null)
     }
 
         <h1>@place.Name</h1>
-        <MudText Typo="Typo.subtitle1">@place.Address</MudText>
 
-        <AuthorizeView>
-            <Authorized>
+        <MudText Typo="Typo.subtitle1">@place.Address</MudText>
                 @if(isAdded)
                 {
                     <MudButton StartIcon="@Icons.Material.Filled.RemoveCircleOutline" Style="color: black;" Size="Size.Large"  Color="Color.Primary" Class="mt-6" Variant="Variant.Filled" OnClick="RemoveFromTrip">
@@ -51,17 +47,6 @@ else if (place != null)
                         Lägg till
                     </MudButton>
                 }
-            </Authorized>
-            <NotAuthorized>
-                <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Login"
-                            Style="color: black;" Color="Color.Primary" Size="Size.Large" Class="mt-6"
-                            OnClick="@(() => Navigation.NavigateTo($"/logga-in?redirect=/plats/{mapServicePlaceId}"))">
-                            Logga in för att spara platsen till resan
-                        </MudButton>
-            </NotAuthorized>
-        </AuthorizeView>
-       
-
         <MudDivider Class="mt-5" />
 
         <MudContainer MaxWidth="MaxWidth.Medium" Style="margin: 0; padding: 0;">
@@ -175,18 +160,22 @@ else if (place != null)
         isLoading = true;
         errorMessage = null;
         place = null;
-        //kollar om platsen har lagts till i den temporära listan
-        isAdded = TripStopService.HasTemporaryStop(mapServicePlaceId!);
-
-
+        
         if (string.IsNullOrWhiteSpace(mapServicePlaceId))
         {
             errorMessage = "Ingen plats-ID angiven.";
             isLoading = false;
             return;
         }
+
         try
-        {
+        {   
+            //ladda data
+             await TripStopService.LoadAsync();
+
+            //kollar om platsen har lagts till i den temporära listan
+            isAdded = TripStopService.HasTemporaryStop(mapServicePlaceId!);
+
             //anropar service för att hämta platsinfo
             place = await PlaceService.GetPlaceDetailsAsync(mapServicePlaceId);
 
@@ -219,7 +208,7 @@ else if (place != null)
     }
 
 //lägg till stopp till resa.
-   private void AddToTrip()
+   private async Task AddToTrip()
     {
         try
         {
@@ -229,7 +218,7 @@ else if (place != null)
             return;
             }
 
-            TripStopService.AddTemporaryStop(mapServicePlaceId);
+            await TripStopService.AddTemporaryStop(mapServicePlaceId);
             isAdded = true;
 
              Snackbar.Add("Platsen har lagts till i resan.", Severity.Success);
@@ -241,7 +230,7 @@ else if (place != null)
     }
 
     //ta bort stopp från resan
-    private void RemoveFromTrip()
+    private async Task RemoveFromTrip()
     {
         if(string.IsNullOrWhiteSpace(mapServicePlaceId))
         {
@@ -249,7 +238,7 @@ else if (place != null)
             return;
         }
 
-        TripStopService.RemoveTemporaryStop(mapServicePlaceId);
+        await TripStopService.RemoveTemporaryStop(mapServicePlaceId);
         isAdded = false;
 
         Snackbar.Add("Platsen har tagits bort från resan.", Severity.Info);

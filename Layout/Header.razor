@@ -43,34 +43,45 @@
 </MudAppBar>
 
 @code {
+    //skickas in från mainlayout
     [Parameter]
     public EventCallback OnDrawerToggle { get; set; }
 
+    // öppna, stäng sidomeny
     private async Task DrawerToggle(MouseEventArgs e)
     {
         await OnDrawerToggle.InvokeAsync(e);
     }
 
+    //aktuella sidans URL
     private string? currentPath;
 
+    //körs när sidan drar igång,
     protected override void OnInitialized()
-    {
+    {   
+        //kolla ändrad inloggningsstatus
         AuthProvider.AuthenticationStateChanged += AuthStateChanged;
+        //lyssnare för navigeringsändringar
         NavigationManager.LocationChanged += OnLocationChanged;
+        //hämta aktuell sida
         currentPath = GetRelativePath();
     }
 
+    //körs när inloggning förändras, uppdaterar UI
     private async void AuthStateChanged(Task<AuthenticationState> task)
     {
         await InvokeAsync(StateHasChanged);
     }
 
+    //onLocationChanged körs när användaren byter sida
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
+    {   
+        //uppdatera currentPath och rendera om komponent.
         currentPath = GetRelativePath();
         InvokeAsync(StateHasChanged);
     }
 
+    //hämta relativ url
     private string GetRelativePath()
     {
         var currentUri = NavigationManager.Uri.ToLower();
@@ -78,6 +89,7 @@
         return currentUri.Replace(baseUri, "/");
     }
 
+    //ändrar stil på bakgrund beroende på sida
     private string GetAppBarStyle()
     {
         return currentPath == "/karta"
@@ -98,6 +110,7 @@
         return Color.Default;
     }
 
+    //händelseprenumeration tas bort när komponent inte används längre
     public void Dispose()
     {
         AuthProvider.AuthenticationStateChanged -= AuthStateChanged;

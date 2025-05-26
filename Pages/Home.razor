@@ -7,6 +7,7 @@
 @inject NavigationManager Navigation
 @inject TripService TripService
 @inject IJSRuntime JS
+@inject TripStopService TripStopService
 
 <PageTitle>Start</PageTitle>
 
@@ -49,14 +50,31 @@
             await form.Validate();
         }
 
-        if(!success)
+        if (!success)
         {
             ErrorMessage = "Ruttplaneraren är inte korrekt ifylld.";
         }
 
         try
         {
+            //rensa tidigare utkast av stopp
+            await TripStopService.ClearAsync();
+
+            //hämta ny rutt
             var result = await TripService.PlanTripAsync(FromValue, ToValue);
+
+            //spara från/till-platser
+            if (!string.IsNullOrWhiteSpace(result.FromPlaceId))
+            {
+                await TripStopService.SetFromPlaceAsync(result.FromPlaceId);
+            }
+        
+            if (!string.IsNullOrWhiteSpace(result.ToPlaceId))
+            {
+                await TripStopService.SetToPlaceAsync(result.ToPlaceId);
+            }
+
+            //navigera till karta
             Navigation.NavigateTo("/karta");
         }
         catch (Exception ex)

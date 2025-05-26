@@ -1,14 +1,12 @@
 {
   "name": "Avstickare",
   "short_name": "Avstickare",
-  "id": "/",
   "start_url": "/",
   "description": "Planera resor och hitta utflyktsmål med Avstickare",
   "scope": "/",
   "orientation": "portrait",
   "display": "standalone",
   "background_color": "#F8F9FA",
-  "theme_color": "#009688",
   "prefer_related_applications": false,
   "icons": [
     {

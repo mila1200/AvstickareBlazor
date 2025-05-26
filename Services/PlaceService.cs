@@ -10,7 +10,8 @@ namespace AvstickareBlazor
         //för att hämta detaljerad info om platser via backend
         public async Task<PlaceDetailsFront?> GetPlaceDetailsAsync(string mapServicePlaceId)
         {
-            var response = await _http.GetAsync($"/api/Place/{mapServicePlaceId}");
+            
+            var response = await _http.GetAsync($"api/Place/{mapServicePlaceId}");
 
             if (!response.IsSuccessStatusCode)
             {

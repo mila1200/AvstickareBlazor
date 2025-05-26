@@ -1,3 +1,157 @@
 @page "/mina-stopp"
+@inject TripStopService TripStopService
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@using AvstickareBlazor.Models
+@inject ISnackbar Snackbar
 
 <PageTitle>Mina stopp</PageTitle>
+
+<div Style="mb-20">
+    <h1>Mina stopp</h1>
+
+    @if (stopDetails.Any() && fromPlace != null)
+    {
+        <div style="text-align: center; margin-top: 10px;">
+            <h2>Från: <span style="font-style: italic;">@fromPlace.Name</span></h2>
+        </div>
+    }
+
+    @if (stopDetails.Any())
+    {
+        <MudList Dense="true" T="string">
+            @foreach (var stop in stopDetails.OrderBy(stop => stop.Order))
+            {
+                <MudListItem Style="padding: 8px 8px;">
+                                <div style="display: flex; width: 100%;">
+
+                                    <!--bild-->
+                                    <div style="margin-right: 12px;">
+                                        <MudImage Style="max-height: 80px; width: auto;" Src="@stop.Photo" Alt="Platsbild" />
+                                    </div>
+
+                                    <!--innehåll + layout -->
+                                    <div style="display: flex; flex-direction: column; flex-grow: 1; position: relative;">
+                                        <!--övre rad: namn och ordning -->
+                                        <div style="display: flex; justify-content: space-between;">
+                                            <MudText Typo="Typo.h6">@stop.Name</MudText>
+                                            <MudAvatar Size="Size.Small" Color="Color.Primary" Style="Color: black;">@stop.Order
+                                            </MudAvatar>
+                                        </div>
+
+                                        <!-- adress -->
+                                        <MudText Typo="Typo.body2">@stop.Address</MudText>
+
+                                        <!--nedre rad: soptunna.-->
+                                        <div style="display: flex; justify-content: flex-end; margin-top: auto;"
+                                            @onclick:stopPropagation>
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Large"
+                                                Color="Color.Error" OnClick="@(() => RemoveStop(stop.Id!))" />
+                                        </div>
+                                    </div>
+                                </div>
+                            
+                        </MudListItem>
+            }
+        </MudList>
+
+        @if (stopDetails.Any() && toPlace != null)
+        {
+            <div style="text-align: center; margin-top: 10px;">
+                <h2>Till: <span style="font-style: italic;">@toPlace.Name</span></h2>
+            </div>
+        }
+
+        <MudDivider Class="my-4" />
+
+        @if (!showSparaForm)
+        {
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="() => showSparaForm = true">
+                Spara resa
+            </MudButton>
+        }
+        else
+        {
+            <MudTextField Label="Namn på resan" @bind-Value="tripName" Required="true" Immediate="true" />
+            <MudButton OnClick="() => SaveTripAsync(tripName)" Color="Color.Primary" Class="me-2">Spara</MudButton>
+            <MudButton OnClick="() => showSparaForm = false" Color="Color.Default">Avbryt</MudButton>
+        }
+    }
+    else
+    {
+        <MudText>Inga stopp valda ännu.</MudText>
+    }
+</div>
+
+@code {
+    private List<PlaceDetailsFront> stopDetails = [];
+    private bool showSparaForm = false;
+    private string tripName = $"Min resa {DateTime.Now:yyyy-MM-dd}";
+
+    //från place, baserat på modellen PlaceDetailsFront
+    private PlaceDetailsFront? fromPlace;
+
+    //till place, baserat på PlaceDetailsFront
+    private PlaceDetailsFront? toPlace;
+
+
+    //ladda stopp när sidan laddas
+    protected override async Task OnInitializedAsync()
+    {
+        await TripStopService.LoadAsync();
+        stopDetails = await TripStopService.GetTemporaryStops();
+
+        fromPlace = await TripStopService.GetFromPlaceDetailsAsync();
+        toPlace = await TripStopService.GetToPlaceDetailsAsync();
+    }
+
+    //ta bort temporärt stopp
+    private async Task RemoveStop(string id)
+    {
+        await TripStopService.RemoveTemporaryStop(id);
+        stopDetails.RemoveAll(p => p.Id == id);
+
+        Snackbar.Add("Platsen har tagits bort från resan.", Severity.Info);
+    }
+
+    //spara resa från temporär till permanent
+    private async Task SaveTripAsync(string tripName)
+    {
+        var draft = TripStopService.Draft;
+
+        if (string.IsNullOrWhiteSpace(draft.FromPlaceId) || string.IsNullOrWhiteSpace(draft.ToPlaceId))
+        {
+            Console.WriteLine("Från- och tillplats krävs.");
+            return;
+        }
+
+        var trip = new Trip
+        {
+            FromPlaceId = draft.FromPlaceId,
+            ToPlaceId = draft.ToPlaceId,
+            Name = tripName
+        };
+
+        var response = await Http.PostAsJsonAsync("api/Trip", trip);
+        if (!response.IsSuccessStatusCode)
+        {
+            Console.WriteLine("Kunde inte spara resan.");
+            return;
+        }
+
+        var savedTrip = await response.Content.ReadFromJsonAsync<Trip>();
+        if (savedTrip == null)
+        {
+            Console.WriteLine("Resan sparades inte korrekt.");
+            return;
+        }
+
+        foreach (var stopId in draft.StopPlaceIds)
+        {
+            await TripStopService.AddStopToTripAsync(savedTrip.TripId, stopId);
+        }
+
+        await TripStopService.ClearAsync();
+        Navigation.NavigateTo("/mina-resor");
+    }
+}

@@ -34,7 +34,10 @@ else
         if (hasRendered) return;
         hasRendered = true;
 
-        await Task.Delay(100); // ge DOM tid att rendera <div id="map">
+        //ge DOM tid att rendera <div id="map">
+        await Task.Delay(100);
+        
+        //anropa funktion i js-mappen för att initiera mappen
         await JS.InvokeVoidAsync("initMap");
 
         if (TripService.LatestTrip is not null)

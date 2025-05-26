@@ -13,5 +13,8 @@ namespace AvstickareBlazor.Models
         public string? Photo { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+
+        //för att kunna hålla reda på ordningen på stoppen (sorteras efter vad som är närmast startpunkten)
+        public int? Order {get; set;}
     }
 }

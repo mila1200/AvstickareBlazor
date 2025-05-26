@@ -69,7 +69,8 @@ window.highlightPlace = async function (lat, lng, name) {
     const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker");
 
     const pin = new PinElement({
-        background: "#f44336", // röd för att sticka ut
+        //röd för att sticka ut
+        background: "#f44336", 
         borderColor: "#b71c1c",
         glyphColor: "#fff"
     });

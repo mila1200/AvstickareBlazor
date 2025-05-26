@@ -9,12 +9,4 @@ namespace AvstickareBlazor.Models
         public string? Duration { get; set; }
         public List<PlaceToShow> SuggestedPlaces { get; set; } = [];
     }
-
-    public class PlaceToShow
-    {
-        public string? Name { get; set; }
-        public double? Lat { get; set; }
-        public double? Lng { get; set; }
-        public string? MapServicePlaceId { get; set; }
-    }
 }
