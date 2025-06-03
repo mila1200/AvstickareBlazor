@@ -1,5 +1,6 @@
 @page "/karta"
 @using AvstickareBlazor.Models
+@using System.Text.Json
 @inject IJSRuntime JS
 @inject TripService TripService
 @inject PlaceService PlaceService
@@ -8,6 +9,7 @@
 
 @if (TripService.LatestTrip is null && string.IsNullOrWhiteSpace(mapServicePlaceId))
 {
+
     <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
         <MudText Typo="Typo.h6">Ingen rutt har skapats ännu.</MudText>
         <MudText>Gå tillbaka till startsidan och skapa en resa för att se den på kartan.</MudText>
@@ -29,6 +31,25 @@ else
 
     private bool hasRendered = false;
 
+    protected override async Task OnParametersSetAsync()
+    {
+        if (TripService.LatestTrip is not null || !string.IsNullOrWhiteSpace(mapServicePlaceId))
+        {
+            return;
+        }
+
+        var json = await JS.InvokeAsync<string>("localStorage.getItem", "latestTrip");
+
+        if (!string.IsNullOrWhiteSpace(json))
+        {
+            var trip = JsonSerializer.Deserialize<TripPlanResult>(json);
+            if (trip is not null)
+            {
+                TripService.LatestTrip = trip;
+                StateHasChanged();
+            }
+        }
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (hasRendered) return;
@@ -36,7 +57,7 @@ else
 
         //ge DOM tid att rendera <div id="map">
         await Task.Delay(100);
-        
+
         //anropa funktion i js-mappen för att initiera mappen
         await JS.InvokeVoidAsync("initMap");
 

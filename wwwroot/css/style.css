@@ -25,3 +25,15 @@
         transform: rotate(360deg);
     }
 }
+
+#stop-container {
+    width: 95%;
+    margin: 0 auto;
+}
+
+@media (min-width: 960px) {
+    #stop-container {
+        max-width: 960px;
+        margin: 0 auto;
+    }
+}

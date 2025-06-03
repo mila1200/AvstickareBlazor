@@ -3,12 +3,14 @@
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @using AvstickareBlazor.Models
+@using Microsoft.AspNetCore.Components.Authorization
 @inject ISnackbar Snackbar
 
 <PageTitle>Mina stopp</PageTitle>
 
-<div Style="mb-20">
-    <h1>Mina stopp</h1>
+<div style="margin-bottom: 60px;">
+    <div id="stop-container">
+        <h1 style="margin-top: 10px;">Mina stopp</h1>
 
     @if (stopDetails.Any() && fromPlace != null)
     {
@@ -19,10 +21,10 @@
 
     @if (stopDetails.Any())
     {
-        <MudList Dense="true" T="string">
+        <MudList T="string">
             @foreach (var stop in stopDetails.OrderBy(stop => stop.Order))
             {
-                <MudListItem Style="padding: 8px 8px;">
+                <MudListItem>
                                 <div style="display: flex; width: 100%;">
 
                                     <!--bild-->
@@ -63,24 +65,49 @@
         }
 
         <MudDivider Class="my-4" />
-
+        
         @if (!showSparaForm)
         {
-            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="() => showSparaForm = true">
-                Spara resa
-            </MudButton>
+             <AuthorizeView>
+    <Authorized>
+        <MudButton FullWidth="true"
+                   Class="mt-6"
+                   Style="color: black;"
+                   Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="@(() => showSparaForm = true)">
+            Spara resa
+        </MudButton>
+    </Authorized>
+    <NotAuthorized>
+        <MudButton Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Filled.Login"
+                   Style="color: black;"
+                   Color="Color.Primary"
+                   FullWidth="true"
+                   Class="mt-6"
+                   OnClick="@(() => Navigation.NavigateTo("/logga-in?redirect=/mina-stopp"))">
+            Logga in för att spara resa
+        </MudButton>
+    </NotAuthorized>
+    </AuthorizeView>
         }
         else
-        {
-            <MudTextField Label="Namn på resan" @bind-Value="tripName" Required="true" Immediate="true" />
-            <MudButton OnClick="() => SaveTripAsync(tripName)" Color="Color.Primary" Class="me-2">Spara</MudButton>
-            <MudButton OnClick="() => showSparaForm = false" Color="Color.Default">Avbryt</MudButton>
+        {   
+            <MudContainer >
+            <MudTextField Label="Namn på resan" @bind-Value="tripName" Required="true" Immediate="true" RequiredError="Resan måste ha ett namn" />
+            <MudButton OnClick="() => SaveTripAsync(tripName)" FullWidth="true" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Style="color: black;" Color="Color.Primary" Class="mt-5">Spara</MudButton>
+            <MudButton OnClick="() => showSparaForm = false" Class="mt-5" FullWidth="true" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Cancel" Color="Color.Default">Avbryt</MudButton>
+            </MudContainer>
         }
+        
     }
     else
     {
         <MudText>Inga stopp valda ännu.</MudText>
     }
+    </div>
 </div>
 
 @code {

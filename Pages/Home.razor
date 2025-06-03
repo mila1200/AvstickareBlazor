@@ -3,6 +3,7 @@
 @using System.Text.RegularExpressions
 @using System.ComponentModel.DataAnnotations
 @using AvstickareBlazor.Models
+@using System.Text.Json
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject TripService TripService
@@ -62,6 +63,10 @@
 
             //hämta ny rutt
             var result = await TripService.PlanTripAsync(FromValue, ToValue);
+
+            //spara utkastet för resan i localstorage
+            await JS.InvokeVoidAsync("localStorage.setItem", "latestTrip",
+            JsonSerializer.Serialize(result));
 
             //spara från/till-platser
             if (!string.IsNullOrWhiteSpace(result.FromPlaceId))
