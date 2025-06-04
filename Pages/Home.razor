@@ -32,6 +32,12 @@
         <MudButton OnClick="SendTripRequest" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowForward"
             Style="color: black;" Color="Color.Primary" Class="mt-6">Skapa rutt</MudButton>
     </MudForm>
+
+    @if (isLoading)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mt-10" />
+        <MudText Typo="Typo.body1" Align="Align.Center">Laddar ditt nästa äventyr...</MudText>
+    }
 </MudContainer>
 
 @code
@@ -44,6 +50,8 @@
     public string? FromValue { get; set; }
     public string? ToValue { get; set; }
 
+    private bool isLoading = false;
+
     private async Task SendTripRequest()
     {
         if (form is not null)
@@ -55,6 +63,8 @@
         {
             ErrorMessage = "Ruttplaneraren är inte korrekt ifylld.";
         }
+
+        isLoading = true;
 
         try
         {
@@ -85,6 +95,10 @@
         catch (Exception ex)
         {
             ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 

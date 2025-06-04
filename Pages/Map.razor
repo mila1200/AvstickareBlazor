@@ -58,21 +58,22 @@ else
         //ge DOM tid att rendera <div id="map">
         await Task.Delay(100);
 
-        //anropa funktion i js-mappen för att initiera mappen
-        await JS.InvokeVoidAsync("initMap");
+            //anropa funktion i js-mappen för att initiera mappen
+            await JS.InvokeVoidAsync("initMap");
 
-        if (TripService.LatestTrip is not null)
-        {
-            await JS.InvokeVoidAsync("drawTrip", TripService.LatestTrip.Polyline, TripService.LatestTrip.SuggestedPlaces);
-        }
-
-        if (!string.IsNullOrWhiteSpace(mapServicePlaceId))
-        {
-            var place = await PlaceService.GetPlaceDetailsAsync(mapServicePlaceId);
-            if (place?.Latitude != null && place?.Longitude != null)
+            if (TripService.LatestTrip is not null)
             {
-                await JS.InvokeVoidAsync("highlightPlace", place.Latitude, place.Longitude, place.Name ?? "Plats");
+                await JS.InvokeVoidAsync("drawTrip", TripService.LatestTrip.Polyline, TripService.LatestTrip.SuggestedPlaces);
             }
-        }
+
+            if (!string.IsNullOrWhiteSpace(mapServicePlaceId))
+            {
+                var place = await PlaceService.GetPlaceDetailsAsync(mapServicePlaceId);
+                if (place?.Latitude != null && place?.Longitude != null)
+                {
+                    await JS.InvokeVoidAsync("highlightPlace", place.Latitude, place.Longitude, place.Name ?? "Plats");
+                }
+            }
     }
 }
+

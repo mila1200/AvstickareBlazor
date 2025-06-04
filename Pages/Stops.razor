@@ -5,6 +5,8 @@
 @using AvstickareBlazor.Models
 @using Microsoft.AspNetCore.Components.Authorization
 @inject ISnackbar Snackbar
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+
 
 <PageTitle>Mina stopp</PageTitle>
 
@@ -29,7 +31,7 @@
 
                                     <!--bild-->
                                     <div style="margin-right: 12px;">
-                                        <MudImage Style="max-height: 80px; width: auto;" Src="@stop.Photo" Alt="Platsbild" />
+                                        <MudImage Style="height: auto; max-width: 120px;" Src="@stop.Photo" Alt="Platsbild" />
                                     </div>
 
                                     <!--innehåll + layout -->
@@ -138,47 +140,44 @@
         await TripStopService.RemoveTemporaryStop(id);
         stopDetails.RemoveAll(p => p.Id == id);
 
+        //uppdatera ordningen 
+        for (int i = 0; i < stopDetails.Count; i++)
+        {
+            stopDetails[i].Order = i + 1;
+        }
+
         Snackbar.Add("Platsen har tagits bort från resan.", Severity.Info);
     }
 
     //spara resa från temporär till permanent
-    private async Task SaveTripAsync(string tripName)
+   private async Task SaveTripAsync(string tripName)
+{
+    var draft = TripStopService.Draft;
+
+    var token = await LocalStorage.GetItemAsync<string>("authToken");
+    if (string.IsNullOrWhiteSpace(draft.FromPlaceId) || string.IsNullOrWhiteSpace(draft.ToPlaceId) || string.IsNullOrWhiteSpace(token))
+        return;
+
+    var trip = new Trip { Name = tripName, FromPlaceId = draft.FromPlaceId, ToPlaceId = draft.ToPlaceId };
+
+    var request = new HttpRequestMessage(HttpMethod.Post, "api/Trip")
     {
-        var draft = TripStopService.Draft;
+        Content = JsonContent.Create(trip)
+    };
+    request.Headers.Authorization = new("Bearer", token);
 
-        if (string.IsNullOrWhiteSpace(draft.FromPlaceId) || string.IsNullOrWhiteSpace(draft.ToPlaceId))
-        {
-            Console.WriteLine("Från- och tillplats krävs.");
-            return;
-        }
+    var response = await Http.SendAsync(request);
+    var savedTrip = await response.Content.ReadFromJsonAsync<Trip>();
 
-        var trip = new Trip
-        {
-            FromPlaceId = draft.FromPlaceId,
-            ToPlaceId = draft.ToPlaceId,
-            Name = tripName
-        };
-
-        var response = await Http.PostAsJsonAsync("api/Trip", trip);
-        if (!response.IsSuccessStatusCode)
-        {
-            Console.WriteLine("Kunde inte spara resan.");
-            return;
-        }
-
-        var savedTrip = await response.Content.ReadFromJsonAsync<Trip>();
-        if (savedTrip == null)
-        {
-            Console.WriteLine("Resan sparades inte korrekt.");
-            return;
-        }
-
+    if (response.IsSuccessStatusCode && savedTrip != null)
+    {
         foreach (var stopId in draft.StopPlaceIds)
-        {
             await TripStopService.AddStopToTripAsync(savedTrip.TripId, stopId);
-        }
 
+        //rensa draft från local storage
         await TripStopService.ClearAsync();
+        Snackbar.Add("Resan har sparats!", Severity.Success);
         Navigation.NavigateTo("/mina-resor");
     }
+}
 }

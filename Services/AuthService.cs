@@ -28,6 +28,7 @@ namespace AvstickareBlazor
                 return null;
             }
 
+            Console.WriteLine(result.Token);
             //lagra i ls
             await _localStorage.SetItemAsync("authToken", result.Token);
             //uppdatera inloggningstillstånd
